@@ -101,8 +101,8 @@ file), `CASEFILE_DB` (default `.casefile/casefile.db`).
 
 ## Architecture
 
-Four layers. Each talks only to the layer below it. The diagrams in this file were not
-render-checked.
+Four layers. Calls go downward, with two exceptions shown in the diagram: Claude Desktop and
+claude.ai reach the Casefile server directly, and agents drive Claude in Chrome.
 
 ```mermaid
 flowchart TD
