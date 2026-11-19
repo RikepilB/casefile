@@ -19,7 +19,7 @@ Casefile never sends anything to a customer by itself.
 | Customer | A SaaS business with a support queue. |
 | Browser | Use Claude in Chrome to reproduce issues in the product's UI. Casefile does not build an extension. *Assumed capability.* |
 | MCP | Casefile ships its own MCP server. |
-| Existing MCP servers | Skills call the business's own MCP servers (product, logs, code) when they exist; Casefile's server supplies tickets and case files when they don't. |
+| Existing MCP server | Assumed to exist for the business's tickets and product data; it may need improvements. Casefile works alongside it: skills call it, and the Casefile server keeps the cases. Synthetic fixtures stand in for it until someone has access, and improving it is in scope from then. |
 | Surfaces | One plugin for Claude Code in the terminal, on desktop and on the web; the same server reaches Claude Desktop and claude.ai as a connector. *Assumed.* |
 | Guides | Written guides for the harness, skills, agents and the whole flow ship with the product. |
 
@@ -236,6 +236,8 @@ erDiagram
 - **First real ticket system** for subsystem 4.
 - **Name:** `casefile` is a placeholder and unvetted.
 - **The ticket ID rule** above.
+- **What the existing MCP server exposes.** Nobody on this project has reviewed it. The answer
+  decides whether Casefile's three ticket tools ship or stay a development stand-in.
 
 ## Not in scope
 
