@@ -5,12 +5,32 @@ exists yet.
 
 ## What it is
 
-Casefile turns a support ticket into an evidence-backed investigation that a person approves. It is
-built for teams that already work in Claude: an MCP server holds tickets and case files, and a
-Claude Code plugin (skills, agents, commands, hooks) runs the flow on top of it.
+Casefile runs incident response for problems that customers report. When several support tickets
+describe the same problem, it keeps the whole investigation in one case, built from evidence that
+names its source, and a person approves everything that goes out. It is built for teams that
+already work in Claude: an MCP server holds tickets and case files, and a Claude Code plugin
+(skills, agents, commands, hooks) runs the flow on top of it.
 
-Flow: **triage → investigate → analyze patterns → draft reply → a human approves and sends.**
-Casefile never sends anything to a customer by itself.
+Flow: **know the client → detect → declare → investigate → communicate → review.** Casefile never
+sends anything to a customer by itself.
+
+This replaces the earlier wording (triage → investigate → analyze patterns → draft reply). Detect
+covers triage and pattern analysis, declare opens the case, and communicate covers the reply draft
+and adds a status update. Review is new. Skill and agent names elsewhere in these documents still
+use the earlier words.
+
+An incident is the case on the first ticket, with the related tickets linked to it as
+`similar_ticket` evidence. There is no separate incident record yet. Detection runs when a person
+asks for it; nothing watches the queue.
+
+**Client profile (proposed).** A profile holds what is known about one client: the systems they
+run, their background with the product and their workflow. It is collected through a short guided
+intake or from pasted notes, and later steps read it so the investigation and the reply fit that
+client. It is not part of the server contract, and the ticket schema has no client identifier to
+match a ticket to a profile. Material collected from a client is untrusted, like ticket text.
+
+**Hand-over.** A case holds everything known so far, so anyone on the team, technical or not, can
+pick it up and continue. A case has no owner field yet.
 
 ## Scope decisions
 
@@ -148,6 +168,37 @@ flowchart TD
 Code layout for the server is the File Structure table in Plan 1. Whether the plugin lives in the
 same repo is decided in the plugin's plan, once its packaging rules are verified.
 
+## Integration design
+
+Companies keep tickets, client records, product data, logs and code in different systems. Casefile
+is designed around the role each system plays, so a system can be swapped without changing the
+flow. None of this is built yet.
+
+| Role | What Casefile needs from it | Typical system | Status |
+|---|---|---|---|
+| Ticket source | Search tickets; get one ticket. | Help desk | Contract defined (`TicketSource`); synthetic source in Plan 1. |
+| Client knowledge | Read a client's profile and add to it. | CRM, account notes, onboarding documents | Proposed. |
+| Product and account data | Look up an account, its plan and its settings. | The product's database or admin API | Through the existing MCP server, which nobody has reviewed. |
+| Logs and metrics | Find events for an account in a time window. | Logging or monitoring system | Later. |
+| Code and changes | Find a recent change, or the code behind a feature. | Code repository | Later. |
+| Outbound channel | Send an approved reply or status update. | Help desk, status page, chat | Not in scope. It needs the approval hook first. |
+
+1. **Roles, not products.** A skill names a role. It never names a vendor or a tool.
+2. **MCP is the plug.** Each system connects as an MCP server: the company's own, a vendor's, or a
+   thin one written for it.
+3. **A capability map binds roles to tools, per company.** It is one file in the plugin, and its
+   format is defined in the plugin's plan.
+4. **One shape inside.** Tickets, cases, evidence and profiles each have one schema. Adapters
+   translate and validate at the edge, and everything that arrives from outside is untrusted.
+5. **A missing role degrades the flow and does not stop it.** The case records what could not be
+   checked.
+6. **Every adapter passes its role's contract tests.** For tickets, those are the tests the
+   synthetic source passes.
+7. **The contract only grows.** New fields and tools are optional additions. Nothing is renamed; a
+   breaking change gets a new tool name.
+8. **Least privilege.** Connections are read-only by default, anything outward goes through the
+   approval hook, and third-party servers are scanned before install.
+
 ## Scaling, by trigger
 
 No capacity figures here: nothing has been measured. Each change waits for its trigger.
@@ -214,6 +265,7 @@ erDiagram
 | APPROVAL, AUDIT_EVENT, MEMBER | Later | Arrive with auth; evidence gains an author then. |
 | TICKET_SOURCE, WORKSPACE | Later | Arrive with the second source or second team. |
 | INCIDENT | Later | One root cause shared by many cases. |
+| CLIENT_PROFILE | Proposed | One per client; not drawn above. Where it is stored is an open decision. |
 
 ## Known risks
 
@@ -238,7 +290,17 @@ erDiagram
 - **The ticket ID rule** above.
 - **What the existing MCP server exposes.** Nobody on this project has reviewed it. The answer
   decides whether Casefile's three ticket tools ship or stay a development stand-in.
+- **Where the status update and the review are kept.** The contract stores one `draft_reply` per
+  case. Both new drafts are written in the conversation and are not stored until this is decided.
+- **Where client profiles are stored.** Proposed first version: one Markdown file per synthetic
+  client, read by the skills. The alternative is a table and tools in the Casefile server, which
+  people working in Claude Desktop or claude.ai would need. How a ticket is matched to a profile
+  is part of this decision: a ticket has a customer name, email and plan, but no client
+  identifier. The demo uses one profile, for the client on the first ticket.
+- **An owner on a case.** One optional text field on the case and on `casefile_update_case`. It
+  changes the tool contract, so it needs the team's agreement.
 
 ## Not in scope
 
-A support inbox, a kanban board, a status page, a chat widget, billing, or sending replies.
+A support inbox, a kanban board, a status page, a chat widget, billing, sending replies,
+monitoring alerts, paging, on-call schedules, or incident chat channels.

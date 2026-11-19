@@ -1,31 +1,82 @@
 # Casefile
 
-Every support ticket ends with a case file: what happened, the evidence and where it came from,
-and a reply that a person approved.
+Casefile helps a support team take a customer's problem from the first ticket to a closed case.
+It keeps what is known about the client, treats tickets about the same problem as one incident,
+and holds the evidence, the drafts and the review in one case. Anyone on the team, technical or
+not, can pick a case up where the last person left it. A person approves everything that goes out.
 
 **Status: planning only. No code exists yet.** "Casefile" is a working name that has not been
 checked against trademarks or existing products.
 
 ## The idea
 
-A ticket's investigation usually lives in people's heads, chat threads and browser tabs. The same
-question gets investigated twice, and a reply goes out without anyone being able to show why it is
-right.
+Three things slow a support team down:
 
-Casefile gives each ticket one case. The case is built inside Claude from evidence that names its
-source, and it ends in a draft that a person approves. When several tickets share one cause, the
-case becomes the record of that incident.
+- **One problem arrives as several tickets.** Each is picked up on its own, so it is investigated
+  more than once and customers get different answers.
+- **The person working a ticket lacks the client's context.** Which systems the client runs, how
+  they use the product and what happened before sit in other people's heads, so the answer is
+  generic.
+- **Work is hard to hand over.** The state of an investigation lives in a chat thread, so the next
+  person starts again.
+
+Casefile keeps two records and builds everything on them:
+
+- A **client profile**: the client's systems, background and workflow, collected once through a
+  short guided intake and easy to add to.
+- A **case** per incident: the related tickets, the evidence with its sources, the drafts and the
+  review.
+
+It follows the lifecycle that on-call teams use (detect, declare, investigate, communicate,
+review), but it starts from tickets instead of monitoring alerts. It runs inside Claude, next to
+the MCP server the business already has.
 
 ## The objective
 
-Turn a support ticket into an evidence-backed investigation that a person approves, for teams that
-already work in Claude.
+A team can take in a support problem, hand it over, work it and close it, without redoing work
+and with an answer that fits the client. It has to work for technical and non-technical teammates
+alike.
 
-- Every claim in a case names where it came from.
-- A person approves anything that is sent.
-- It works alongside the MCP server a business already has.
+The first version is done when a demo on synthetic data shows all of this:
+
+- A profile for one client is built from a short intake and pasted notes.
+- Six tickets about the same PDF export problem end up in one case, not six.
+- A second person picks the case up part-way, using only the case.
+- The root cause is backed by evidence, and every evidence item names its source.
+- A reply to that client, which reflects their profile, and one status update for everyone
+  affected are drafted from the case. Nothing is sent.
+- The case is closed, and a post-incident review is drafted from its timeline.
+- A ticket that contains hidden instructions (`T-1014`) is reported and not obeyed.
+- Every step starts from a plain-language request. Nobody writes code or a query.
+- All of it runs next to the existing MCP server, with synthetic tickets standing in for it until
+  that server is available.
+
+If time runs out, the cut order in the plan says which of these drop first.
 
 ## The project
+
+Casefile runs six steps:
+
+| Step | What Casefile does | Not included |
+|---|---|---|
+| Know the client | Collects the client's systems, background and workflow into a profile, from a short guided intake or pasted notes. Later steps read the profile of the client on the ticket. | Syncing from a CRM. |
+| Detect | When asked, finds tickets that share key terms and proposes treating them as one incident. | Monitoring alerts, paging, on-call schedules. |
+| Declare and hand over | Opens one case on the first ticket and links the related tickets to it as evidence. Anyone can pick the case up, because it holds everything known so far. | Chat channels, role assignment, video calls. |
+| Investigate | Records hypotheses and evidence, each with its source, then a root cause. | Nothing. |
+| Communicate | Drafts a reply to the client on the first ticket, using their profile, and one status update for everyone affected. A person approves; Casefile sends nothing. | Publishing to a status page. |
+| Close and review | Marks the case resolved and drafts a post-incident review from its timeline. | Metrics and follow-up tracking. |
+
+Three pieces are not in the server contract yet, and each is an open decision in the design:
+
+- **The client profile.** The proposed first version is one Markdown file per synthetic client
+  that the skills read. The ticket schema has no client identifier, so how a ticket is matched to
+  a profile is part of the same decision; the demo uses one profile, for the client on the first
+  ticket. Material collected from a client is handled like ticket text: as data, never as
+  instructions.
+- **An owner on a case.** A case can be picked up by anyone today; naming who has it is a proposed
+  small addition.
+- **The status update and the review.** Only the reply is saved on the case. The other two are
+  written in the conversation.
 
 Casefile does not replace the business's MCP server. It adds two things next to it.
 
@@ -82,6 +133,20 @@ It scales by trigger, not by forecast:
 - A second person needs the same cases → HTTP with auth, and Postgres.
 - The ticket system limits how fast it can be read → a local ticket cache.
 - A second team uses it → a workspace on every row, taken from the login token.
+
+It connects to whatever systems a company has:
+
+- **Roles, not products.** Casefile needs a ticket source, client knowledge, product and account
+  data, logs, and code. Skills name the role and never a vendor.
+- **MCP is the plug.** Each system connects as an MCP server: the company's own, a vendor's, or a
+  thin one written for it.
+- **One capability map per company.** It says which server and tool fills each role. Changing the
+  help desk means editing the map, not the skills.
+- **One shape inside.** Tickets, cases, evidence and profiles each have one schema. Adapters
+  translate and validate at the edge.
+- **A missing role does not stop the flow.** The step says what it could not check and continues.
+- **The contract only grows.** Fields and tools are added, never renamed, and every adapter passes
+  the same tests as the synthetic source.
 
 ## Code style
 
@@ -199,26 +264,17 @@ Third-party skills and plugins are scanned before anyone installs them.
 
 ## Plan: a two-day hackathon (proposed)
 
-The hackathon version follows the incident lifecycle that on-call tools use, cut down to what can
-be shown on synthetic tickets inside Claude. The design doc has not been updated for it yet.
-
-| Step | What Casefile does | Left out |
-|---|---|---|
-| Detect | Finds tickets that share key terms and proposes an incident. | Monitoring alerts, paging, on-call schedules. |
-| Declare | Opens one case for the incident and links the related tickets as evidence. | Chat channels, role assignment, video calls. |
-| Investigate | Records hypotheses and evidence with sources, then a root cause. | Nothing. |
-| Communicate | Drafts a customer reply and a status update. A person approves; nothing is sent. | Publishing to a status page. |
-| Review | Drafts a post-incident review from the case's timeline. | Metrics and follow-up tracking. |
+The first version is the six steps above, shown on synthetic data inside Claude.
 
 | When | Engineers | Product owner |
 |---|---|---|
-| Day 1, morning | Agree the tool contract. Build the ticket schema, fixture source and case store. Verify the plugin format. | Write the synthetic tickets, including one group with a shared cause. |
+| Day 1, morning | Agree the tool contract. Build the ticket schema, fixture source and case store. Verify the plugin format. | Write the synthetic tickets, including one group with a shared cause, and one synthetic client profile. |
 | Day 1, afternoon | Finish the server tools so the server runs in Claude Code. Write the `investigate` skill. | Write the demo script and the expected result for each ticket. |
-| Day 2, morning | Write the skills for detect and declare, status update, and review. Run the whole flow once. | Run the flow as a user and report what is confusing. |
+| Day 2, morning | Write the skills for client intake, detect and declare, status update, and review. Run the whole flow once. | Run the flow as a non-technical user and report what is confusing. |
 | Day 2, afternoon | Stop adding features. Fix only what breaks the demo. | Rehearse the demo and record a backup. |
 
-If the team falls behind, cut in this order: the review skill, case statistics, similarity
-quality. Never cut the untrusted-text marking, evidence with sources, or the rule that nothing is
+If the team falls behind, cut in this order: the review skill, the guided intake (write the
+profile by hand instead), case statistics, similarity quality. Never cut the untrusted-text marking, evidence with sources, or the rule that nothing is
 sent.
 
 Whether this fits in two days is a judgment, not a measurement. The cut order is there for that

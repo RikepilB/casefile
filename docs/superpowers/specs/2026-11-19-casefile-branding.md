@@ -5,13 +5,14 @@ the first one does (a landing page, a case viewer), run a `design-intent` pass f
 
 ## Name and tagline
 
-**Casefile** — every ticket ends with a case file.
+**Casefile** — one case per incident, with the client's context built in.
 
 The name is a working name. Nobody has checked it against trademarks or existing products.
 
 ## Audience
 
-First: support engineers and the developers they escalate to, who already work in Claude Code.
+First: the whole support team, technical or not: support agents, support engineers and the
+developers they escalate to.
 Second: the support lead who has to trust what gets sent to a customer.
 
 The audience decision in the design spec is still open, and it changes this section more than any
@@ -50,16 +51,18 @@ shown.
 
 ## Problem and solution
 
-**Problem.** A ticket's investigation lives in people's heads, chat threads and browser tabs. The
-same question gets investigated twice, and a reply goes out without anyone being able to show why
-it is right.
+**Problem.** One problem reaches support as several tickets, the person who picks one up lacks the
+client's context, and work is hard to hand over. The same question is investigated more than once,
+the answer is generic, and afterwards nobody can show why a reply was right.
 
-**Solution.** One case per ticket, built from evidence that names its source, ending in a draft
-that a person approves.
+**Solution.** A profile per client and one case per incident. The case runs from the first ticket
+to the review, is built from evidence that names its source, can be picked up by anyone on the
+team, and ends in drafts that a person approves.
 
 ## Story
 
-The demo and the pitch tell one story on the synthetic PDF-export tickets.
+The demo and the pitch tell one story on the synthetic PDF-export tickets. This story predates the
+client profile, the hand-over and the close step, which still need adding to it.
 
 1. **A ticket arrives.** `T-1001`: PDF export timeout.
 2. **A case opens.** Similar tickets surface from the same cluster.
