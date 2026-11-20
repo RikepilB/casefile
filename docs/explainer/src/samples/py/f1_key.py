@@ -17,6 +17,9 @@ def ask_claude(question: str) -> str:
     Returns:
         The text Claude wrote, with any non-text blocks left out.
     """
+    # Before this line in a real app: check who is calling, with whatever
+    # sign-in your app uses. If this sits behind a public web address,
+    # anyone who finds it can spend your credit.
     response = client.messages.create(
         model="claude-opus-5-5",
         max_tokens=16000,

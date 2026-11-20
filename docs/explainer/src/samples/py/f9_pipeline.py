@@ -15,14 +15,22 @@ class Ticket(BaseModel):
     text: str
 
 
-async def triage(tickets: list[Ticket]) -> dict[str, list[tuple[Ticket, TicketLabel]]]:
+class TriageResult(BaseModel):
+    """What triage hands on: groups to investigate, and tickets held back."""
+
+    groups: dict[str, list[tuple[Ticket, TicketLabel]]]  # safe to investigate
+    flagged: list[tuple[Ticket, TicketLabel]]  # for a person; never passed on
+
+
+async def triage(tickets: list[Ticket]) -> TriageResult:
     """Classify every ticket, then group tickets that share a label.
 
     Args:
         tickets: The tickets to sort.
 
     Returns:
-        Groups of (ticket, label) pairs, keyed by category and key terms.
+        The groups to investigate, keyed by category and key terms, and the
+        tickets that were flagged and held back for a person.
     """
     # return_exceptions=True: one failed ticket must not sink the other five.
     results = await asyncio.gather(
@@ -31,17 +39,22 @@ async def triage(tickets: list[Ticket]) -> dict[str, list[tuple[Ticket, TicketLa
     )
 
     groups: dict[str, list[tuple[Ticket, TicketLabel]]] = defaultdict(list)
+    flagged: list[tuple[Ticket, TicketLabel]] = []
     for ticket, result in zip(tickets, results, strict=True):
         if isinstance(result, BaseException):
             print(f"{ticket.id} needs a human: {result}")
             continue
 
         # A ticket that tries to give orders is set aside for a person.
+        # "continue" is the point: it never joins a group, so the
+        # investigation step, which has tools, never sees its text.
         if result.contains_instructions:
             print(f"{ticket.id} contains instructions. Flagged, not obeyed.")
+            flagged.append((ticket, result))
+            continue
 
         # Grouping is plain code on purpose: it is cheap, and it gives the
         # same answer every time, which a model does not promise.
         key = f"{result.category}:{'+'.join(sorted(result.key_terms)[:2])}"
         groups[key].append((ticket, result))
-    return dict(groups)
+    return TriageResult(groups=dict(groups), flagged=flagged)

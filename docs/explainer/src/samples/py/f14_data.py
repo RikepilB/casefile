@@ -7,6 +7,9 @@ client = anthropic.Anthropic()
 
 # Claude keeps nothing between calls, so the conversation lives here.
 # In a real app this dict is a database table keyed by conversation ID.
+# The dict is only safe one request at a time. A real store must also handle
+# two replies arriving together, and a delete that lands mid-reply:
+# use a transaction or a lock per conversation.
 conversations: dict[str, list[MessageParam]] = {}
 
 

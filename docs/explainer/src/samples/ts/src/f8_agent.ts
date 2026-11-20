@@ -50,15 +50,22 @@ export async function investigate(ticketId: string): Promise<void> {
       for (const block of event.content) {
         if (block.type === "text") process.stdout.write(block.text);
       }
-    } else if (event.type === "agent.mcp_tool_use" && event.evaluated_permission === "ask") {
-      // Our rule: reading is fine, anything that writes is denied here
-      // and goes to a person instead. Never answer "allow" to everything.
+    } else if (
+      (event.type === "agent.mcp_tool_use" || event.type === "agent.tool_use") &&
+      event.evaluated_permission === "ask"
+    ) {
+      // Both kinds of tool can stop and ask: your MCP tools, and the
+      // built-in ones when the "auto" policy is not sure. Every ask needs
+      // an answer, or the session waits forever.
+      // Our rule: reading your own tickets is fine. Everything else is
+      // denied here and goes to a person. Never answer "allow" to everything.
+      const readOnly = event.type === "agent.mcp_tool_use" && READ_ONLY.has(event.name);
       await client.beta.sessions.events.send(session.id, {
         events: [
           {
             type: "user.tool_confirmation",
             tool_use_id: event.id,
-            result: READ_ONLY.has(event.name) ? "allow" : "deny",
+            result: readOnly ? "allow" : "deny",
           },
         ],
       });

@@ -4,6 +4,9 @@ const client = new Anthropic();
 
 // Claude keeps nothing between calls, so the conversation lives here.
 // In a real app this Map is a database table keyed by conversation ID.
+// The Map is only safe one request at a time. A real store must also handle
+// two replies arriving together, and a delete that lands mid-reply:
+// use a transaction or a lock per conversation.
 const conversations = new Map<string, Anthropic.MessageParam[]>();
 
 export async function reply(conversationId: string, userText: string): Promise<string> {

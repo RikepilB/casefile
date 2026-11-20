@@ -79,7 +79,7 @@ const GUIDE_FIXES = [
   ["404", "The model name has a typo.", "Copy the name exactly from the documentation.", "message"],
   ["400", "The request is malformed, for example max_tokens is missing.", "Read the error message. It names the field.", "message"],
   ["429", "Too many requests for your tier.", "The SDK retries by itself. If it keeps happening, slow down.", "sdk"],
-  ["Key visible in the Network tab", "Your web page is calling Claude directly.", "Move the call to your server.", "key"],
+  ["Key visible in the Network tab", "Your web page is calling Claude directly.", "Delete that key now and make a new one. Then move the call to your server.", "key"],
   ["Claude in Chrome stops", "It reached a login, a CAPTCHA or a pop-up dialog. This is by design.", "Do that part yourself, then tell it to continue.", null],
   ["The bill is higher than expected", "A long chat resends its whole history every turn.", "See where the money goes.", "tokens"],
 ];

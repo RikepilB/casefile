@@ -63,16 +63,22 @@ def investigate(ticket_id: str) -> None:
                 for block in event.content:
                     if block.type == "text":
                         print(block.text, end="", flush=True)
-            elif event.type == "agent.mcp_tool_use" and event.evaluated_permission == "ask":
-                # Our rule: reading is fine, anything that writes is denied
-                # here and goes to a person. Never answer "allow" to everything.
+            elif (
+                event.type in ("agent.mcp_tool_use", "agent.tool_use") and event.evaluated_permission == "ask"
+            ):
+                # Both kinds of tool can stop and ask: your MCP tools, and the
+                # built-in ones when the "auto" policy is not sure. Every ask
+                # needs an answer, or the session waits forever.
+                # Our rule: reading your own tickets is fine. Everything else
+                # is denied here and goes to a person. Never allow everything.
+                read_only = event.type == "agent.mcp_tool_use" and event.name in READ_ONLY
                 client.beta.sessions.events.send(
                     session_id=session.id,
                     events=[
                         {
                             "type": "user.tool_confirmation",
                             "tool_use_id": event.id,
-                            "result": "allow" if event.name in READ_ONLY else "deny",
+                            "result": "allow" if read_only else "deny",
                         }
                     ],
                 )
