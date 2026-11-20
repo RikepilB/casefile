@@ -186,6 +186,7 @@ Not checked yet:
 | [Epics and process](docs/superpowers/plans/2026-11-19-casefile-epics-and-process.md) | Epics, issues, roles and how the team works. |
 | [MCP server plan](docs/superpowers/plans/2026-11-19-casefile-mcp-server.md) | The Casefile server, in six test-first tasks. |
 | [Branding and story](docs/superpowers/specs/2026-11-19-casefile-branding.md) | Name, voice, visual direction and the demo story. |
+| [Claude API Explorer](https://claude.ai/artifact/F5BfbN3qqbres8zMU1fuGL) | An interactive walkthrough of the pieces Casefile is built from: API keys, the SDK, tools, MCP, agents, billing and scheduled jobs, one message at a time. |
 
 ## Resources
 
