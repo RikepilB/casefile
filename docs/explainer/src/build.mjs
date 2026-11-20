@@ -14,7 +14,7 @@ for (const n of names) {
 // "</" inside an inline <script> would end the script early, so escape it.
 const safe = (s) => s.replace(/<\//g, "<\\/");
 const body = readFileSync("page.html", "utf8")
-  .replace("/*__DATA__*/", () => safe(readFileSync("flows.js", "utf8") + "\n" + readFileSync("flows2.js", "utf8")))
+  .replace("/*__DATA__*/", () => safe(readFileSync("flows.js", "utf8") + "\n" + readFileSync("flows2.js", "utf8") + "\n" + readFileSync("quiz.js", "utf8") + "\n" + readFileSync("guide.js", "utf8")))
   .replace("/*__CODE__*/", () => "const CODE = " + safe(JSON.stringify(code)) + ";");
 
 // page.html is only the page content (the hosted version gets its shell added when published).
@@ -23,4 +23,6 @@ const shell = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">
   '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
   "<style>body{margin:0}[hidden]{display:none!important}</style>\n</head>\n<body>\n";
 writeFileSync("../claude-api-explorer.html", shell + body + "\n</body>\n</html>\n");
+// The hosted version is published without the shell; set ARTIFACT_OUT to also write that form.
+if (process.env.ARTIFACT_OUT) writeFileSync(process.env.ARTIFACT_OUT, body);
 console.log("wrote ../claude-api-explorer.html", shell.length + body.length, "bytes");

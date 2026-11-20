@@ -22,6 +22,8 @@ clone the repository.
 | `claude-api-explorer.html` | The built page. Generated; do not edit by hand. |
 | `src/page.html` | Layout, styles and the script that draws the flows. |
 | `src/flows.js`, `src/flows2.js` | The content: actors, flows, steps, glossary, use cases. |
+| `src/quiz.js` | One check-yourself question per flow. |
+| `src/guide.js` | The "Try it yourself" checklist, its three paths, the copyable prompts and the troubleshooting table. |
 | `src/samples/ts/src`, `src/samples/py` | The code samples shown in the page's code tab, in TypeScript and Python. |
 | `src/build.mjs` | Puts the three together into the built page. |
 
@@ -43,3 +45,6 @@ The build needs Node only, with no packages. To type-check the TypeScript sample
 - Plan prices, billing rules and data-retention wording were read from Anthropic's public pages on
   20 November 2026. They change; check the source pages before budgeting.
 - The Claude Code flow's payloads are simplified to show their shape.
+- What Claude in Chrome can and cannot do, and where keys and spend limits live in the Console, were
+  read from Anthropic's documentation and help pages on 20 November 2026. Nobody ran the
+  "Try it yourself" steps or the prompts end to end.
