@@ -1,5 +1,9 @@
 # Casefile
 
+**New here? Start with the [Claude API Explorer](https://claude.ai/artifact/F5BfbN3qqbres8zMU1fuGL):** an interactive
+walkthrough of the pieces Casefile is built from, one message at a time. You can also
+[download it as one HTML file](docs/explainer/claude-api-explorer.html).
+
 Casefile helps a support team take a customer's problem from the first ticket to a closed case.
 It keeps what is known about the client, treats tickets about the same problem as one incident,
 and holds the evidence, the drafts and the review in one case. Anyone on the team, technical or
